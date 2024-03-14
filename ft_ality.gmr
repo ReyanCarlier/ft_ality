@@ -1,0 +1,10 @@
+transition,start,f,forward
+transition,start,d,down
+transition,forward,p,punch
+transition,forward,f,forward
+transition,down,k,kick
+transition,down,d,down
+transition,punch,f,specialPunch
+transition,kick,d,specialKick
+move,specialPunch,Mega Punch
+move,specialKick,Ultra Kick
