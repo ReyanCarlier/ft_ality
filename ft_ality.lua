@@ -1,3 +1,5 @@
+local debugMode = false
+
 local function getKeys(tab)
     local keys = {}
     for key, _ in pairs(tab) do
@@ -28,6 +30,9 @@ local function loadGrammar(filePath)
             transitions[parts[2]][parts[3]] = parts[4]
 		elseif parts[1] == "move" and #parts == 3 then
             moves[parts[2]] = parts[3]
+		else
+			print("Invalid line: " .. line .. " | Please make sure the gmr file is correct.")
+			os.exit()
 		end
     end
 
@@ -46,9 +51,11 @@ local Automaton = {
             self.currentState = nextState
             if self.moves[nextState] then
                 print("Special Move Detected: " .. self.moves[nextState])
+				if debugMode then print("Returning to state 'start' after successfuly send a special move.") end
                 self.currentState = "start" -- Reset state after a move
             end
         else
+			if debugMode then print("Invalid key: " .. key .. " | Returning to state 'start'") end
             self.currentState = "start" -- Reset state if invalid key
         end
     end,
@@ -56,7 +63,8 @@ local Automaton = {
 		if self.transitions.start then
 			print("Available actions: " .. table.concat(getKeys(self.transitions.start), ", "))
 		else
-			print("No available actions for the start state.")
+			print("No available actions for the start state. Please make sure the gmr file is correct.")
+			os.exit()
 		end
 	end,
 	displayTransitions = function(self)
@@ -78,15 +86,23 @@ Automaton:displayActions()
 Automaton:displayTransitions()
 Automaton:displayMoves()
 
--- Programme principal
-while true do
-    print("\nEnter your move sequence ('f', 'd', 'p', 'k', or 'quit' to exit): ")
-	print("Current state : " .. Automaton.currentState)
-    local input = io.read() -- Lecture de la séquence de l'utilisateur
-    if input == "quit" then break end -- Sortie du programme
-    for i = 1, #input do
-        local key = input:sub(i, i)
-        Automaton:transition(key)
-    end
+
+local function main()
+	if arg[1] == "DEBUG" then
+		debugMode = true
+		print("Debug mode activated.")
+	end
+	-- Programme principal
+	while true do
+		print("\nEnter your move sequence ('f', 'd', 'p', 'k', or 'quit' to exit): ")
+		print("Current state : " .. Automaton.currentState)
+		local input = io.read() -- Lecture de la séquence de l'utilisateur
+		if input == "quit" then break end -- Sortie du programme
+		for i = 1, #input do
+			local key = input:sub(i, i)
+			Automaton:transition(key)
+		end
+	end
 end
 
+main() -- Appel du programme principal
